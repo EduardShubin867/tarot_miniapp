@@ -58,34 +58,57 @@ button:disabled {
 
 .spread {
     display: flex;
-    gap: 2.5rem;
+    gap: 3rem;
     justify-content: center;
     align-items: center;
     perspective: 1500px;
     margin: 3rem 0;
-    min-height: 400px;
+    min-height: 600px;
 }
 
 .card {
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
+    background-color: transparent;
     border-radius: 20px;
-    padding: 2rem;
-    width: 300px;
-    text-align: center;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2),
-        inset 0 0 50px rgba(255, 255, 255, 0.1);
-    transform-style: preserve-3d;
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #fff;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 275px;
+    height: 475px;
     position: relative;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
+}
+
+.card-image {
+    flex: 1;
+    background-color: transparent;
+}
+
+.card-content {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 0.8rem;
+    width: 100%;
+    text-align: center;
+    position: absolute;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-content h3 {
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    width: 100%;
+}
+
+.card-content p {
+    margin: 3px 0;
+    color: #fff;
+    font-size: 0.9em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    width: 100%;
 }
 
 .card::after {
@@ -133,27 +156,6 @@ button:disabled {
 
 .card:hover::before {
     opacity: 1;
-}
-
-.card h3 {
-    color: #fff;
-    margin-bottom: 1.5rem;
-    font-size: 1.4rem;
-    font-weight: 700;
-    text-shadow: var(--text-shadow);
-    transform: translateZ(20px);
-    position: relative;
-    z-index: 2;
-}
-
-.card p {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 1.1rem;
-    margin-top: 1rem;
-    text-shadow: var(--text-shadow);
-    transform: translateZ(15px);
-    position: relative;
-    z-index: 2;
 }
 
 .interpretation {
@@ -247,8 +249,21 @@ button:disabled {
     }
 
     .card {
-        width: 280px;
-        padding: 1.5rem;
+        width: 220px;
+        height: 380px;
+    }
+
+    .card-content {
+        padding: 0.6rem;
+    }
+
+    .card-content h3 {
+        font-size: 1em;
+    }
+
+    .card-content p {
+        font-size: 0.8em;
+        margin: 2px 0;
     }
 }
 
@@ -306,16 +321,16 @@ button:disabled {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(8px);
     z-index: 1000;
 }
 
 .crystal-ball {
     position: relative;
-    width: 150px;
-    height: 150px;
-    margin-bottom: 20px;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 30px;
 }
 
 .crystal-ball__sphere {
@@ -323,13 +338,16 @@ button:disabled {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 100px;
-    height: 100px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
+    box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(155, 109, 255, 0.5);
+    animation: glowPulse 2s ease-in-out infinite;
 }
 
 .crystal-ball__mist {
@@ -339,10 +357,10 @@ button:disabled {
     background: linear-gradient(
         45deg,
         transparent,
-        rgba(255, 255, 255, 0.1),
+        rgba(155, 109, 255, 0.3),
         transparent
     );
-    animation: mistRotate 10s linear infinite;
+    animation: mistRotate 8s linear infinite;
 }
 
 .crystal-ball__glow {
@@ -361,11 +379,18 @@ button:disabled {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
-    height: 20px;
-    background: rgba(255, 255, 255, 0.1);
+    width: 80px;
+    height: 30px;
+    background: rgba(155, 109, 255, 0.3);
     border-radius: 50%;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.loading-container p {
+    color: #fff;
+    font-size: 1.5em;
+    text-shadow: 0 0 10px rgba(155, 109, 255, 0.8);
+    letter-spacing: 2px;
 }
 
 @keyframes mistRotate {
@@ -377,5 +402,20 @@ button:disabled {
     }
     100% {
         transform: rotate(360deg) translateY(0);
+    }
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.1),
+            0 0 30px rgba(155, 109, 255, 0.5);
+    }
+    50% {
+        box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.2),
+            0 0 50px rgba(155, 109, 255, 0.8);
+    }
+    100% {
+        box-shadow: inset 0 0 50px rgba(255, 255, 255, 0.1),
+            0 0 30px rgba(155, 109, 255, 0.5);
     }
 }

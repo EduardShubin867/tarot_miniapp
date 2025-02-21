@@ -127,31 +127,33 @@ const App: React.FC = () => {
         }
     }
 
-    // Анимации для карт
+    // Обновляем анимации для карт
     const cardVariants = {
         initial: {
             opacity: 0,
-            y: 100,
-            rotateY: 180,
-            scale: 0.8,
+            x: -1000, // Начальная позиция слева
+            y: -200,
+            rotateZ: -90, // Начальный поворот
+            scale: 0.6,
         },
         animate: {
             opacity: 1,
+            x: 0,
             y: 0,
-            rotateY: 0,
+            rotateZ: 0,
             scale: 1,
             transition: {
                 type: 'spring',
-                stiffness: 100,
-                damping: 15,
-                duration: 0.8,
+                stiffness: 200,
+                damping: 20,
+                duration: 1,
             },
         },
         exit: {
             opacity: 0,
             y: -100,
-            rotateY: -180,
-            scale: 0.8,
+            rotateZ: 90,
+            scale: 0.6,
             transition: {
                 duration: 0.5,
             },
@@ -222,17 +224,58 @@ const App: React.FC = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
-                        <div className="crystal-ball">
+                        <motion.div
+                            className="crystal-ball"
+                            animate={{
+                                y: [-10, 10, -10],
+                                scale: [1, 0.98, 1],
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: 'easeInOut',
+                            }}
+                            style={{
+                                filter: 'drop-shadow(0 20px 13px rgba(0, 0, 0, 0.3))',
+                                transformOrigin: 'center',
+                            }}
+                        >
                             <div className="crystal-ball__sphere">
                                 <div className="crystal-ball__mist" />
                                 <div className="crystal-ball__glow" />
                             </div>
                             <div className="crystal-ball__base" />
-                        </div>
+                        </motion.div>
+                        <motion.div
+                            className="shadow"
+                            animate={{
+                                scale: [1.1, 0.9, 1.1],
+                                opacity: [0.4, 0.2, 0.4],
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: 'easeInOut',
+                            }}
+                            style={{
+                                width: '80px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                                marginTop: '20px',
+                                filter: 'blur(8px)',
+                            }}
+                        />
                         <motion.p
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ repeat: Infinity, duration: 2 }}
+                            style={{
+                                fontSize: '1.5em',
+                                color: '#fff',
+                                textShadow: '0 0 10px rgba(155, 109, 255, 0.8)',
+                                marginTop: '20px',
+                            }}
                         >
                             Читаю судьбу...
                         </motion.p>
@@ -250,12 +293,16 @@ const App: React.FC = () => {
             </motion.button>
 
             <AnimatePresence mode="wait">
-                {spread && (
+                {spread && !isLoading && (
                     <motion.div
                         className="spread"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        style={{
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                        }}
                     >
                         {(['past', 'present', 'future'] as const).map(
                             (time: TimeKey, index) => (
@@ -266,18 +313,14 @@ const App: React.FC = () => {
                                     initial="initial"
                                     animate="animate"
                                     exit="exit"
-                                    transition={{ delay: index * 0.2 }}
-                                >
-                                    <h3>
-                                        {time === 'past'
-                                            ? 'Прошлое'
-                                            : time === 'present'
-                                            ? 'Настоящее'
-                                            : 'Будущее'}
-                                    </h3>
-                                    <p>{spread[time].name}</p>
-                                    <p>{spread[time].meaning}</p>
-                                </motion.div>
+                                    transition={{ delay: index * 0.3 }}
+                                    style={{
+                                        backgroundImage: `url(${spread[time].image})`,
+                                        backgroundSize: 'contain',
+                                        backgroundPosition: 'center',
+                                        backgroundRepeat: 'no-repeat',
+                                    }}
+                                />
                             )
                         )}
                     </motion.div>
