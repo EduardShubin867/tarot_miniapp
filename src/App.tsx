@@ -78,43 +78,37 @@ const App: React.FC = () => {
     // Запрос к OpenAI API
     const getInterpretation = async (spread: TarotSpread) => {
         try {
-            const response = await fetch(
-                'https://api.openai.com/v1/chat/completions',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${
-                            import.meta.env.VITE_OPENAI_API_KEY
-                        }`,
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-4o-mini-2024-07-18',
-                        messages: [
-                            {
-                                role: 'user',
-                                content: `Ты - мистический оракул, древний провидец, говорящий загадочно и поэтично.
-                                Интерпретируй расклад карт Таро, создавая атмосферу тайны и магии:
+            const response = await fetch('/api/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini-2024-07-18',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: `Ты - мистический оракул, древний провидец, говорящий загадочно и поэтично.
+                            Интерпретируй расклад карт Таро, создавая атмосферу тайны и магии:
 
-                                Прошлое: ${spread.past.name} (${spread.past.meaning})
-                                Настоящее: ${spread.present.name} (${spread.present.meaning})
-                                Будущее: ${spread.future.name} (${spread.future.meaning})
+                            Прошлое: ${spread.past.name} (${spread.past.meaning})
+                            Настоящее: ${spread.present.name} (${spread.present.meaning})
+                            Будущее: ${spread.future.name} (${spread.future.meaning})
 
-                                Дай мистическую интерпретацию в 200-300 слов. Используй метафоры, образные сравнения и поэтические обороты.
-                                Начни с загадочного обращения. Заверши пророческим напутствием.
+                            Дай мистическую интерпретацию в 200-300 слов. Используй метафоры, образные сравнения и поэтические обороты.
+                            Начни с загадочного обращения. Заверши пророческим напутствием.
 
-                                Используй форматирование markdown для выделения ключевых фраз и создания структуры текста.`,
-                            },
-                        ],
-                        temperature: 0.9,
-                    }),
-                }
-            )
+                            Используй форматирование markdown для выделения ключевых фраз и создания структуры текста.`,
+                        },
+                    ],
+                    temperature: 0.9,
+                }),
+            })
 
             const data = await response.json()
             setInterpretation(data.choices[0].message.content)
         } catch (error) {
-            console.error('Ошибка OpenAI:', error)
+            console.error('Ошибка при получении интерпретации:', error)
             setInterpretation('Произошла ошибка при получении интерпретации')
         } finally {
             setIsLoading(false)
