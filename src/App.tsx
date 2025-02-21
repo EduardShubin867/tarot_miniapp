@@ -295,11 +295,14 @@ const App: React.FC = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         style={{
+                            display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
+                            justifyContent: 'center',
                             position: 'relative',
                             width: '100%',
                             gap: '20px',
+                            padding: '20px 0',
                         }}
                     >
                         {(['past', 'present', 'future'] as const).map(
@@ -333,12 +336,14 @@ const App: React.FC = () => {
                                     style={{
                                         backgroundImage: `url(${spread[time].image})`,
                                         backgroundSize: 'cover',
-                                        backgroundPosition: 'center',
+                                        backgroundPosition: 'center center',
                                         backgroundRepeat: 'no-repeat',
                                         transformStyle: 'preserve-3d',
                                         width: '260px',
                                         height: '500px',
-                                        margin: '10px 0',
+                                        margin: '0 auto',
+                                        display: 'block',
+                                        position: 'relative',
                                         transition: 'transform 0.2s ease-out',
                                     }}
                                 />
