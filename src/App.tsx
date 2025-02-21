@@ -321,7 +321,7 @@ const App: React.FC = () => {
                                     marginLeft: '0px',
                                     width: '260px',
                                     height: '500px',
-                                    backgroundImage: 'url(images/00.jpg)',
+                                    backgroundImage: 'url(images/deck.jpg)',
                                     backgroundSize: 'cover',
                                     backgroundPosition: 'center',
                                     backgroundRepeat: 'no-repeat',
