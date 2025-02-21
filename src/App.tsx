@@ -37,6 +37,7 @@ const App: React.FC = () => {
     const [interpretation, setInterpretation] = useState<string>('')
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [webApp, setWebApp] = useState<WebApp | null>(null)
+    const [initialDeck, setInitialDeck] = useState<boolean>(true)
 
     // Инициализация Telegram Web App
     useEffect(() => {
@@ -57,26 +58,59 @@ const App: React.FC = () => {
         }
     }, [])
 
-    // Генерация расклада
+    // Обновляем варианты анимации для начальной колоды
+    const deckCardVariants = {
+        initial: {
+            opacity: 1,
+            x: 0,
+            y: 0,
+            rotateZ: 0,
+            scale: 1,
+        },
+        shuffle: (i: number) => ({
+            x: [-8, 8, -8, 8, 0],
+            y: [-5, 3, -4, 2, 0],
+            rotateZ: [-3, 2, -2, 3, 0],
+            scale: [1, 1.02, 0.98, 1.01, 1],
+            transition: {
+                duration: 0.5,
+                delay: i * 0.02,
+                repeat: Infinity,
+                ease: 'easeInOut',
+            },
+        }),
+        exit: (i: number) => ({
+            x: -200,
+            y: -100,
+            rotateZ: -45,
+            opacity: 0,
+            transition: {
+                duration: 0.5,
+                delay: i * 0.1,
+            },
+        }),
+    }
+
+    // Модифицируем функцию generateSpread
     const generateSpread = () => {
         setIsLoading(true)
         setInterpretation('')
+        setInitialDeck(false) // Убираем начальную колоду
+        getInterpretation()
+        webApp?.HapticFeedback?.impactOccurred('medium')
+    }
 
+    // Запрос к OpenAI API
+    const getInterpretation = async () => {
+        // Генерируем расклад сразу
         const shuffled = [...tarotCards].sort(() => 0.5 - Math.random())
         const newSpread: TarotSpread = {
             past: shuffled[0],
             present: shuffled[1],
             future: shuffled[2],
         }
-
         setSpread(newSpread)
-        getInterpretation(newSpread)
 
-        webApp?.HapticFeedback?.impactOccurred('medium')
-    }
-
-    // Запрос к OpenAI API
-    const getInterpretation = async (spread: TarotSpread) => {
         try {
             const response = await fetch(
                 'https://mvtgbotapi.ru/api/tarot/interpretation',
@@ -92,9 +126,9 @@ const App: React.FC = () => {
                                 content: `Ты - мистический оракул, древний провидец, говорящий загадочно и поэтично.
                                 Интерпретируй расклад карт Таро, создавая атмосферу тайны и магии:
 
-                                Прошлое: ${spread.past.name} (${spread.past.meaning})
-                                Настоящее: ${spread.present.name} (${spread.present.meaning})
-                                Будущее: ${spread.future.name} (${spread.future.meaning})
+                                Прошлое: ${newSpread.past.name} (${newSpread.past.meaning})
+                                Настоящее: ${newSpread.present.name} (${newSpread.present.meaning})
+                                Будущее: ${newSpread.future.name} (${newSpread.future.meaning})
 
                                 Структурируй ответ следующим образом:
 
@@ -127,20 +161,20 @@ const App: React.FC = () => {
         }
     }
 
-    // Обновляем анимации для карт
+    // Обновляем варианты анимации для карт расклада
     const cardVariants = {
         initial: {
             opacity: 0,
-            x: -1000, // Начальная позиция слева
-            y: -200,
-            rotateZ: -90, // Начальный поворот
+            x: 0,
+            y: 0,
+            rotateY: 180,
             scale: 0.6,
         },
         animate: {
             opacity: 1,
             x: 0,
             y: 0,
-            rotateZ: 0,
+            rotateY: 0,
             scale: 1,
             transition: {
                 type: 'spring',
@@ -152,12 +186,39 @@ const App: React.FC = () => {
         exit: {
             opacity: 0,
             y: -100,
-            rotateZ: 90,
+            rotateY: 180,
             scale: 0.6,
             transition: {
                 duration: 0.5,
             },
         },
+    }
+
+    // Добавляем функцию для обработки движения мыши/тапа
+    const handleCardInteraction = (
+        e: React.MouseEvent | React.TouchEvent,
+        element: HTMLElement
+    ) => {
+        const rect = element.getBoundingClientRect()
+        const x = e.type.includes('mouse')
+            ? (e as React.MouseEvent).clientX - rect.left
+            : (e as React.TouchEvent).touches[0].clientX - rect.left
+        const y = e.type.includes('mouse')
+            ? (e as React.MouseEvent).clientY - rect.top
+            : (e as React.TouchEvent).touches[0].clientY - rect.top
+
+        const centerX = rect.width / 2
+        const centerY = rect.height / 2
+        const rotateX = ((y - centerY) / centerY) * -15 // максимальный наклон 15 градусов
+        const rotateY = ((x - centerX) / centerX) * 15
+
+        element.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`
+    }
+
+    // Добавляем функцию сброса позиции
+    const handleCardReset = (element: HTMLElement) => {
+        element.style.transform =
+            'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
     }
 
     useEffect(() => {
@@ -216,84 +277,66 @@ const App: React.FC = () => {
                 Расклад Таро
             </motion.h1>
 
-            <AnimatePresence>
-                {isLoading && (
-                    <motion.div
-                        className="loading-container"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <motion.div
-                            className="crystal-ball"
-                            animate={{
-                                y: [-10, 10, -10],
-                                scale: [1, 0.98, 1],
-                            }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                ease: 'easeInOut',
-                            }}
-                            style={{
-                                filter: 'drop-shadow(0 20px 13px rgba(0, 0, 0, 0.3))',
-                                transformOrigin: 'center',
-                            }}
-                        >
-                            <div className="crystal-ball__sphere">
-                                <div className="crystal-ball__mist" />
-                                <div className="crystal-ball__glow" />
-                            </div>
-                            <div className="crystal-ball__base" />
-                        </motion.div>
-                        <motion.div
-                            className="shadow"
-                            animate={{
-                                scale: [1.1, 0.9, 1.1],
-                                opacity: [0.4, 0.2, 0.4],
-                            }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                ease: 'easeInOut',
-                            }}
-                            style={{
-                                width: '80px',
-                                height: '20px',
-                                borderRadius: '50%',
-                                backgroundColor: 'rgba(0, 0, 0, 0.2)',
-                                marginTop: '20px',
-                                filter: 'blur(8px)',
-                            }}
-                        />
-                        <motion.p
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ repeat: Infinity, duration: 2 }}
-                            style={{
-                                fontSize: '1.5em',
-                                color: '#fff',
-                                textShadow: '0 0 10px rgba(155, 109, 255, 0.8)',
-                                marginTop: '20px',
-                            }}
-                        >
-                            Читаю судьбу...
-                        </motion.p>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
             <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={generateSpread}
                 disabled={isLoading}
             >
-                {isLoading ? 'Генерируется...' : 'Сделать расклад'}
+                {isLoading ? 'Перемешиваю карты...' : 'Сделать расклад'}
             </motion.button>
 
+            <AnimatePresence>
+                {(initialDeck || isLoading) && (
+                    <motion.div
+                        className="initial-deck"
+                        style={{
+                            position: 'relative',
+                            width: '260px',
+                            height: '500px',
+                            margin: '20px auto',
+                            perspective: '1000px',
+                        }}
+                    >
+                        {Array.from({ length: 15 }).map((_, index) => (
+                            <motion.div
+                                key={`deck-card-${index}`}
+                                className="card"
+                                variants={deckCardVariants}
+                                initial="initial"
+                                animate={
+                                    isLoading
+                                        ? 'shuffle'
+                                        : initialDeck
+                                        ? 'initial'
+                                        : 'exit'
+                                }
+                                custom={index}
+                                style={{
+                                    position: 'absolute',
+                                    top: index * 1,
+                                    left: 0,
+                                    right: 0,
+                                    margin: '0 auto',
+                                    marginLeft: '0px',
+                                    width: '260px',
+                                    height: '500px',
+                                    backgroundImage: 'url(images/00.jpg)',
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
+                                    boxShadow:
+                                        '0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)',
+                                    transform: `translateZ(${index * 0.5}px)`,
+                                }}
+                            />
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <AnimatePresence mode="wait">
-                {spread && !isLoading && (
+                {spread && !isLoading && !initialDeck && (
                     <motion.div
                         className="spread"
                         initial={{ opacity: 0 }}
@@ -302,6 +345,9 @@ const App: React.FC = () => {
                         style={{
                             flexDirection: 'column',
                             alignItems: 'center',
+                            position: 'relative',
+                            width: '100%',
+                            gap: '20px',
                         }}
                     >
                         {(['past', 'present', 'future'] as const).map(
@@ -313,12 +359,35 @@ const App: React.FC = () => {
                                     initial="initial"
                                     animate="animate"
                                     exit="exit"
+                                    onMouseMove={(e) =>
+                                        handleCardInteraction(
+                                            e,
+                                            e.currentTarget
+                                        )
+                                    }
+                                    onTouchMove={(e) =>
+                                        handleCardInteraction(
+                                            e,
+                                            e.currentTarget
+                                        )
+                                    }
+                                    onMouseLeave={(e) =>
+                                        handleCardReset(e.currentTarget)
+                                    }
+                                    onTouchEnd={(e) =>
+                                        handleCardReset(e.currentTarget)
+                                    }
                                     transition={{ delay: index * 0.3 }}
                                     style={{
                                         backgroundImage: `url(${spread[time].image})`,
-                                        backgroundSize: 'contain',
+                                        backgroundSize: 'cover',
                                         backgroundPosition: 'center',
                                         backgroundRepeat: 'no-repeat',
+                                        transformStyle: 'preserve-3d',
+                                        width: '260px',
+                                        height: '500px',
+                                        margin: '10px 0',
+                                        transition: 'transform 0.2s ease-out',
                                     }}
                                 />
                             )
