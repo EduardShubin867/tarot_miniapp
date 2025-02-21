@@ -58,6 +58,19 @@ const App: React.FC = () => {
         }
     }, [])
 
+    // Добавляем эффект для управления состоянием кнопки
+    useEffect(() => {
+        if (webApp) {
+            if (isLoading) {
+                webApp.MainButton.disable()
+                webApp.MainButton.setText('Читаю карты...')
+            } else {
+                webApp.MainButton.enable()
+                webApp.MainButton.setText('Сделать расклад')
+            }
+        }
+    }, [isLoading, webApp])
+
     // Модифицируем функцию generateSpread
     const generateSpread = () => {
         setIsLoading(true)
