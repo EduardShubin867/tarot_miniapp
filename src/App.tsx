@@ -285,7 +285,7 @@ const App: React.FC = () => {
             {initialDeck && (
                 <div className="initial-deck">
                     <img
-                        src="images/deck.jpg"
+                        src="images/deck.webp"
                         alt="Колода Таро"
                         style={{
                             width: '260px',
