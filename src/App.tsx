@@ -58,44 +58,11 @@ const App: React.FC = () => {
         }
     }, [])
 
-    // Обновляем варианты анимации для начальной колоды
-    const deckCardVariants = {
-        initial: {
-            opacity: 1,
-            x: 0,
-            y: 0,
-            rotateZ: 0,
-            scale: 1,
-        },
-        shuffle: (i: number) => ({
-            x: [-8, 8, -8, 8, 0],
-            y: [-5, 3, -4, 2, 0],
-            rotateZ: [-3, 2, -2, 3, 0],
-            scale: [1, 1.02, 0.98, 1.01, 1],
-            transition: {
-                duration: 0.5,
-                delay: i * 0.02,
-                repeat: Infinity,
-                ease: 'easeInOut',
-            },
-        }),
-        exit: (i: number) => ({
-            x: -200,
-            y: -100,
-            rotateZ: -45,
-            opacity: 0,
-            transition: {
-                duration: 0.5,
-                delay: i * 0.1,
-            },
-        }),
-    }
-
     // Модифицируем функцию generateSpread
     const generateSpread = () => {
         setIsLoading(true)
         setInterpretation('')
-        setInitialDeck(false) // Убираем начальную колоду
+        setInitialDeck(false)
         getInterpretation()
         webApp?.HapticFeedback?.impactOccurred('medium')
     }
@@ -283,57 +250,42 @@ const App: React.FC = () => {
                 onClick={generateSpread}
                 disabled={isLoading}
             >
-                {isLoading ? 'Перемешиваю карты...' : 'Сделать расклад'}
+                {isLoading ? 'Читаю карты...' : 'Сделать расклад'}
             </motion.button>
 
             <AnimatePresence>
-                {(initialDeck || isLoading) && (
+                {isLoading && (
                     <motion.div
-                        className="initial-deck"
-                        style={{
-                            position: 'relative',
-                            width: '260px',
-                            height: '500px',
-                            margin: '20px auto',
-                            perspective: '1000px',
-                        }}
+                        className="loader-container"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                     >
-                        {Array.from({ length: 15 }).map((_, index) => (
-                            <motion.div
-                                key={`deck-card-${index}`}
-                                className="card"
-                                variants={deckCardVariants}
-                                initial="initial"
-                                animate={
-                                    isLoading
-                                        ? 'shuffle'
-                                        : initialDeck
-                                        ? 'initial'
-                                        : 'exit'
-                                }
-                                custom={index}
-                                style={{
-                                    position: 'absolute',
-                                    top: index * 1,
-                                    left: 0,
-                                    right: 0,
-                                    margin: '0 auto',
-                                    marginLeft: '0px',
-                                    width: '260px',
-                                    height: '500px',
-                                    backgroundImage: 'url(images/deck.jpg)',
-                                    backgroundSize: 'cover',
-                                    backgroundPosition: 'center',
-                                    backgroundRepeat: 'no-repeat',
-                                    boxShadow:
-                                        '0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)',
-                                    transform: `translateZ(${index * 0.5}px)`,
-                                }}
-                            />
-                        ))}
+                        <div className="crystal-ball"></div>
+                        <p className="mystical-text">
+                            Древние силы раскрывают тайны судьбы...
+                        </p>
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {initialDeck && (
+                <div className="initial-deck">
+                    <img
+                        src="images/deck.jpg"
+                        alt="Колода Таро"
+                        style={{
+                            width: '260px',
+                            height: '500px',
+                            margin: '20px auto',
+                            display: 'block',
+                            borderRadius: '15px',
+                            boxShadow:
+                                '0 2px 8px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2)',
+                        }}
+                    />
+                </div>
+            )}
 
             <AnimatePresence mode="wait">
                 {spread && !isLoading && !initialDeck && (
