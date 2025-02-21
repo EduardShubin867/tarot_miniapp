@@ -4,6 +4,7 @@ import { cards as tarotCards } from './cards'
 import './App.css'
 import ReactMarkdown from 'react-markdown'
 import type { WebApp } from '@twa-dev/types'
+import OpenAI from 'openai'
 
 // Добавляем определение типа для window.Telegram
 declare global {
@@ -37,6 +38,11 @@ const App: React.FC = () => {
     const [interpretation, setInterpretation] = useState<string>('')
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [webApp, setWebApp] = useState<WebApp | null>(null)
+
+    const openai = new OpenAI({
+        apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+        dangerouslyAllowBrowser: true, // Для работы в браузере
+    })
 
     // Инициализация Telegram Web App
     useEffect(() => {
@@ -78,35 +84,28 @@ const App: React.FC = () => {
     // Запрос к OpenAI API
     const getInterpretation = async (spread: TarotSpread) => {
         try {
-            const response = await fetch('/api/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4o-mini-2024-07-18',
-                    messages: [
-                        {
-                            role: 'user',
-                            content: `Ты - мистический оракул, древний провидец, говорящий загадочно и поэтично.
-                            Интерпретируй расклад карт Таро, создавая атмосферу тайны и магии:
+            const completion = await openai.chat.completions.create({
+                model: 'gpt-4o-mini-2024-07-18',
+                messages: [
+                    {
+                        role: 'user',
+                        content: `Ты - мистический оракул, древний провидец, говорящий загадочно и поэтично.
+                        Интерпретируй расклад карт Таро, создавая атмосферу тайны и магии:
 
-                            Прошлое: ${spread.past.name} (${spread.past.meaning})
-                            Настоящее: ${spread.present.name} (${spread.present.meaning})
-                            Будущее: ${spread.future.name} (${spread.future.meaning})
+                        Прошлое: ${spread.past.name} (${spread.past.meaning})
+                        Настоящее: ${spread.present.name} (${spread.present.meaning})
+                        Будущее: ${spread.future.name} (${spread.future.meaning})
 
-                            Дай мистическую интерпретацию в 200-300 слов. Используй метафоры, образные сравнения и поэтические обороты.
-                            Начни с загадочного обращения. Заверши пророческим напутствием.
+                        Дай мистическую интерпретацию в 200-300 слов. Используй метафоры, образные сравнения и поэтические обороты.
+                        Начни с загадочного обращения. Заверши пророческим напутствием.
 
-                            Используй форматирование markdown для выделения ключевых фраз и создания структуры текста.`,
-                        },
-                    ],
-                    temperature: 0.9,
-                }),
+                        Используй форматирование markdown для выделения ключевых фраз и создания структуры текста.`,
+                    },
+                ],
+                temperature: 0.9,
             })
 
-            const data = await response.json()
-            setInterpretation(data.choices[0].message.content)
+            setInterpretation(completion.choices[0].message.content || '')
         } catch (error) {
             console.error('Ошибка при получении интерпретации:', error)
             setInterpretation('Произошла ошибка при получении интерпретации')
