@@ -83,12 +83,15 @@ const App: React.FC = () => {
     const getInterpretation = async () => {
         try {
             // Получаем расклад и интерпретацию с сервера
-            const response = await fetch('https://mvtgbotapi.ru/api/cards', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
+            const response = await fetch(
+                'https://mvtgbotapi.ru/api/tarot/spread',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            )
 
             const data = await response.json()
             setSpread(data.spread)
