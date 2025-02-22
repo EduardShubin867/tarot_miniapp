@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { cards as tarotCards } from './cards'
 import './App.css'
 import ReactMarkdown from 'react-markdown'
 import type { WebApp } from '@twa-dev/types'
@@ -82,60 +81,24 @@ const App: React.FC = () => {
 
     // Запрос к OpenAI API
     const getInterpretation = async () => {
-        // Генерируем расклад сразу
-        const shuffled = [...tarotCards].sort(() => 0.5 - Math.random())
-        const newSpread: TarotSpread = {
-            past: shuffled[0],
-            present: shuffled[1],
-            future: shuffled[2],
-        }
-        setSpread(newSpread)
-
         try {
+            // Получаем расклад и интерпретацию с сервера
             const response = await fetch(
-                'https://mvtgbotapi.ru/api/tarot/interpretation',
+                'https://mvtgbotapi.ru/api/tarot/cards',
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        messages: [
-                            {
-                                role: 'user',
-                                content: `Ты - мистический оракул, древний провидец, говорящий загадочно и поэтично.
-                                Интерпретируй расклад карт Таро, создавая атмосферу тайны и магии:
-
-                                Прошлое: ${newSpread.past.name} (${newSpread.past.meaning})
-                                Настоящее: ${newSpread.present.name} (${newSpread.present.meaning})
-                                Будущее: ${newSpread.future.name} (${newSpread.future.meaning})
-
-                                Структурируй ответ следующим образом:
-
-                                1. Начни с загадочного обращения
-                                2. Дай общее описание ситуации
-                                3. Для каждой карты:
-                                   - Подробно опиши значение в контексте позиции
-                                   - Как она связана с другими картами
-                                4. Заверши пророческим напутствием
-
-                                Используй форматирование markdown:
-                                - **жирным** выделяй названия карт
-                                - *курсивом* - ключевые предсказания
-                                - Используй ### для разделов
-
-                                Общий объем: 300-400 слов.`,
-                            },
-                        ],
-                    }),
                 }
             )
 
             const data = await response.json()
-            setInterpretation(data.choices[0].message.content)
+            setSpread(data.spread)
+            setInterpretation(data.interpretation)
         } catch (error) {
-            console.error('Ошибка при получении интерпретации:', error)
-            setInterpretation('Произошла ошибка при получении интерпретации')
+            console.error('Ошибка при получении расклада:', error)
+            setInterpretation('Произошла ошибка при получении расклада')
         } finally {
             setIsLoading(false)
         }
