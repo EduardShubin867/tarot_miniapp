@@ -90,6 +90,7 @@ const App: React.FC = () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                 }
             )
 
@@ -310,7 +311,7 @@ const App: React.FC = () => {
                                     }
                                     transition={{ delay: index * 0.3 }}
                                     style={{
-                                        backgroundImage: `url(https://mvtgbotapi.ru/api/images/uploads/cards/${spread[time].image})`,
+                                        backgroundImage: `url(https://mvtgbotapi.ru/api/images/serve/cards/${spread[time].image})`, // Изменяем путь здесь
                                         backgroundSize: 'cover',
                                         backgroundPosition: 'center center',
                                         backgroundRepeat: 'no-repeat',
