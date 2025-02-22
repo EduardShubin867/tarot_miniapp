@@ -310,7 +310,7 @@ const App: React.FC = () => {
                                     }
                                     transition={{ delay: index * 0.3 }}
                                     style={{
-                                        backgroundImage: `url(${spread[time].image})`,
+                                        backgroundImage: `url(https://mvtgbotapi.ru/api/images/uploads/cards/${spread[time].image})`,
                                         backgroundSize: 'cover',
                                         backgroundPosition: 'center center',
                                         backgroundRepeat: 'no-repeat',
